@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Star Wars Card List</h1>
+<br>
+{% for sw_card in starwarscards %}
+  <div class="card">
+    <div class="card-content">
+      <span class="card-title">{{ sw_card.caption }}</span>
+      <p>Series: {{ sw_card.series }}</p>
+      <p>Number: {{ sw_card.number }}</p>
+      <p>Condition: {{ sw_card.condition }}</p>
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}
