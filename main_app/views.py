@@ -1,22 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from .models import StarWarsCard
 
-starwarscards = [
-  {'series': 'Blue',
-   'number': 3,
-   'caption': 'The little droid, Artoo-Detoo', 
-   'condition': 'Fair'
-  },
-  {'series': 'Blue',
-   'number': 5,
-   'caption': 'Princess Leia Organa', 
-   'condition': 'Poor'
-  },
-  {'series': 'Red',
-   'number': 71,
-   'caption': 'The incredible See-Threepio!', 
-   'condition': 'Fair'
-  },
-]
+# if the user goes to the root URL redirect to about
+def root(request):
+  return redirect('about')
 
 # Define the about view
 def about(request):
@@ -24,5 +11,9 @@ def about(request):
 
 # Define the starwarscards view
 def starwarscards_index(request):
-  return render(request, 'starwarscards/index.html',
-                {'starwarscards': starwarscards})
+  starwarscards = StarWarsCard.objects.all()
+  return render(request, 'starwarscards/index.html', {'starwarscards': starwarscards})
+
+def starwarscards_detail(request, swc_id):
+  starwarscard = StarWarsCard.objects.get(id=swc_id)
+  return render(request, 'starwarscards/detail.html', {'starwarscard': starwarscard})
