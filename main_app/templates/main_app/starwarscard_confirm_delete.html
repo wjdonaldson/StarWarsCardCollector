@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Delete Star Wars Card</h1>
+
+  <h4>Are you sure you want to delete 
+    <span class="teal-text">Card #{{ object.card_number }}</span>?</h4>
+
+  <form action="" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="Yes" class="btn">&nbsp;
+    <a href="{% url 'detail' starwarscard.id %}" class="btn">Cancel</a>
+  </form>
+{% endblock %}

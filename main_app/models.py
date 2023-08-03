@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 class StarWarsCard(models.Model):
     SERIES_TYPES = (
@@ -22,3 +23,6 @@ class StarWarsCard(models.Model):
 
     def __str__(self):
         return (f"{self.card_number}: {self.caption}")
+    
+    def get_absolute_url(self):
+        return reverse('detail', kwargs={'swc_id': self.id})

@@ -11,5 +11,9 @@
       <p>Condition: {{ starwarscard.get_condition_type_display }}</p>
       <p>Description: {{ starwarscard.description|linebreaks }}</p>
     </div>
+    <div class="card-action">
+      <a href="{% url 'starwarscards_update' starwarscard.id %}">Edit</a>
+      <a href="{% url 'starwarscards_delete' starwarscard.id %}">Delete</a>
+    </div>
   </div>
 {% endblock %}

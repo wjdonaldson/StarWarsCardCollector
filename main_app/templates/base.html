@@ -8,6 +8,7 @@
   <title>Star Wars Card Collector</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
   <header class="navbar-fixed">
@@ -15,30 +16,32 @@
       <div class="nav-wrapper indigo darken-4">
         <ul>
           <li>
-            <a href="/" class="left brand-logo">
+            <a href="{% url 'root' %}" class="left brand-logo">
               &nbsp;&nbsp;Star Wars Card Collector
             </a>
           </li>
         </ul>
         <ul class="right">
           <li>
-            <a href="/starwarscards">
+            <a href="{% url 'starwarscards_index' %}">
               All Cards
             </a>
           </li>
           <li>
-            <a href="/about">
+            <a href="{% url 'starwarscards_create' %}">
+              Add Card
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'about' %}">
               About
             </a>
           </li>
         </ul>
       </div>
-      {% comment %} <div class="nav-wrapper indigo darken-4">
-        <p class="indigo darken-4 white-text tag-line">May the force be with you!</p>
-      </div> {% endcomment %}
       </nav>
   </header>
-  <p class="indigo darken-4 white-text center-align tag-line">May the force be with you!</p>
+  <p class="indigo darken-2 white-text center-align tag-line">May the force be with you!</p>
   <main class="container">
     {% block content %}
     {% endblock %}

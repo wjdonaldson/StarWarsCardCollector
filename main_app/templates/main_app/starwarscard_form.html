@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if object %}
+  <h1>Edit Card</h1>
+{% else %}
+  <h1>Add Card</h1>
+{% endif %}
+  <form action="" method="POST">
+    {% csrf_token %}
+    <table>
+      {{ form.as_table }}
+    </table>
+    <input type="submit" value="Submit" class="btn">
+  </form>
+  <script>
+    const seriesEl = document.getElementById('id_series_type');
+    M.FormSelect.init(seriesEl);
+    const conditionEl = document.getElementById('id_condition_type');
+    M.FormSelect.init(conditionEl);
+  </script>
+{% endblock %}
