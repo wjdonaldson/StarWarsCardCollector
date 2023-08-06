@@ -3,6 +3,10 @@ import uuid
 import boto3
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import StarWarsCard, Character, Photo
 from .forms import AppraisalForm
 
@@ -10,15 +14,15 @@ from .forms import AppraisalForm
 def root(request):
   return redirect('about')
 
-# Define the about view
 def about(request):
   return render(request, 'about.html')
 
-# Define the starwarscards view
-def starwarscards_index(request):
-  starwarscards = StarWarsCard.objects.all()
-  return render(request, 'starwarscards/index.html', {'starwarscards': starwarscards})
+# @login_required
+# def starwarscards_index(request):
+#   starwarscards = StarWarsCard.objects.filter(user=request.user)
+#   return render(request, 'starwarscards/index.html', {'starwarscards': starwarscards})
 
+@login_required
 def starwarscards_detail(request, swc_id):
   starwarscard = StarWarsCard.objects.get(id=swc_id)
   id_list = starwarscard.characters.all().values_list('id')
@@ -30,28 +34,29 @@ def starwarscards_detail(request, swc_id):
                  'characters': characters_starwarscard_doesnt_have
                  })
 
-class StarWarsCardList(ListView):
+class StarWarsCardList(LoginRequiredMixin, ListView):
     model = StarWarsCard
 
-    # def get_context_data(self, **kwargs):
-    #     appraisal_form = AppraisalForm()
-    #     print(appraisal_form)
-    #     context = super(StarWarsCardList, self).get_context_data(**kwargs)
-    #     context['appraisal_form'] = appraisal_form
-    #     return context
+    def get_queryset(self):
+      return StarWarsCard.objects.filter(user=self.request.user)
 
-class StarWarsCardCreate(CreateView):
+class StarWarsCardCreate(LoginRequiredMixin, CreateView):
   model = StarWarsCard
   fields = ['series_type', 'card_number', 'caption', 'condition_type', 'description']
 
-class StarWarsCardUpdate(UpdateView):
+  def form_valid(self, form):
+    form.instance.user = self.request.user
+    return super().form_valid(form)
+
+class StarWarsCardUpdate(LoginRequiredMixin, UpdateView):
   model = StarWarsCard
   fields = ['series_type', 'card_number', 'caption', 'condition_type', 'description']
 
-class StarWarsCardDelete(DeleteView):
+class StarWarsCardDelete(LoginRequiredMixin, DeleteView):
   model = StarWarsCard
   success_url = '/starwarscards'
 
+@login_required
 def add_appraisal(request, swc_id):
   form = AppraisalForm(request.POST)
   if form.is_valid():
@@ -60,32 +65,35 @@ def add_appraisal(request, swc_id):
     new_appraisal.save()
   return redirect('detail', swc_id=swc_id)
 
-class CharacterList(ListView):
+class CharacterList(LoginRequiredMixin, ListView):
   model = Character
 
-class CharacterDetail(DetailView):
+class CharacterDetail(LoginRequiredMixin, DetailView):
   model = Character
 
-class CharacterCreate(CreateView):
+class CharacterCreate(LoginRequiredMixin, CreateView):
   model = Character
   fields = '__all__'
 
-class CharacterUpdate(UpdateView):
+class CharacterUpdate(LoginRequiredMixin, UpdateView):
   model = Character
   fields = ['name']
 
-class CharacterDelete(DeleteView):
+class CharacterDelete(LoginRequiredMixin, DeleteView):
   model = Character
   success_url = '/characters'
 
+@login_required
 def assoc_character(request, swc_id, character_id):
   StarWarsCard.objects.get(id=swc_id).characters.add(character_id)
   return redirect('detail', swc_id=swc_id)
 
+@login_required
 def unassoc_character(request, swc_id, character_id):
   StarWarsCard.objects.get(id=swc_id).characters.remove(character_id)
   return redirect('detail', swc_id=swc_id)
 
+@login_required
 def add_photo(request, swc_id):
     photo_file = request.FILES.get('photo-file', None)
     if photo_file:
@@ -100,3 +108,17 @@ def add_photo(request, swc_id):
             print('An error occurred uploading file to S3')
             print(e)
     return redirect('detail', swc_id=swc_id)
+
+def signup(request):
+  error_message = ''
+  if request.method == 'POST':
+    form = UserCreationForm(request.POST)
+    if form.is_valid():
+      user = form.save()
+      login(request, user)
+      return redirect('starwarscards_index')
+    else:
+      error_message = 'Invalid sign up - try again'
+  form = UserCreationForm()
+  context = {'form': form, 'error_message': error_message}
+  return render(request, 'registration/signup.html', context)

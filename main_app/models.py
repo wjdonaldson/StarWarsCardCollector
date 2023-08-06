@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 class Character(models.Model):
     name = models.CharField(max_length=100)
@@ -32,6 +33,7 @@ class StarWarsCard(models.Model):
     condition_type = models.CharField(max_length=2, choices=CONDITION_TYPES)
     description = models.TextField(max_length=250)
     characters = models.ManyToManyField(Character)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return (f"{self.card_number}: {self.caption}")
