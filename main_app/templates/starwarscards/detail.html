@@ -1,19 +1,112 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Star Wars Card Details</h1>
-<br>
-  <div class="card">
-    <div class="card-content">
-      <span class="card-title">{{ starwarscard.caption }}</span>
-      {% comment %} <p>Series: {{ sw_card.get_series_type_display() }}</p> {% endcomment %}
-      <p>Series: {{ starwarscard.get_series_type_display }}</p>
-      <p>Number: {{ starwarscard.card_number }}</p>
-      <p>Condition: {{ starwarscard.get_condition_type_display }}</p>
-      <p>Description: {{ starwarscard.description|linebreaks }}</p>
+<div class="row">
+  <div class="col s4">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">{{ starwarscard.caption }}</span>
+        {% comment %} <p>Series: {{ sw_card.get_series_type_display() }}</p> {% endcomment %}
+        <h6>Series: {{ starwarscard.get_series_type_display }}</h6>
+        <h6>Number: {{ starwarscard.card_number }}</h6>
+        <h6>Condition: {{ starwarscard.get_condition_type_display }}</h6>
+        <h6>Description: {{ starwarscard.description|linebreaks }}</h6>
+      </div>
+      <div class="card-action">
+        <a href="{% url 'starwarscards_update' starwarscard.id %}">Edit</a>
+        <a href="{% url 'starwarscards_delete' starwarscard.id %}">Delete</a>
+      </div>
     </div>
-    <div class="card-action">
-      <a href="{% url 'starwarscards_update' starwarscard.id %}">Edit</a>
-      <a href="{% url 'starwarscards_delete' starwarscard.id %}">Delete</a>
+    {% if starwarscard.card_is_appreciating %}
+      <div class="card-panel teal-text center-align">This card is appreciating!</div>
+    {% else %}
+      <div class="card-panel red-text center-align">This card is NOT appreciating!</div>
+    {% endif %}
+  </div>
+  <div class="col s3">
+    {% for photo in starwarscard.photo_set.all %}
+    <img class="responsive-img card-panel" src="{{photo.url}}">
+    {% empty %}
+    <div class="card-panel teal-text center-align">No Photos Uploaded</div>
+    {% endfor %}
+    <form action="{% url 'add_photo' starwarscard.id %}" enctype="multipart/form-data" method="POST" class="card-panel">
+      {% csrf_token %}
+      <input type="file" name="photo-file">
+      <br><br>
+      <button type="submit" class="btn-small">Upload Photo</button>
+    </form>
+  </div>
+  <div class="col s5">
+    <div class="card">
+      <div class="card-content">
+        <form action = "{% url 'add_appraisal' starwarscard.id %}" method="POST">
+          {% csrf_token %}
+          {{ appraisal_form.as_p }}
+          <input type="submit" class="btn-small" value="Add Appraisal">
+        </form>
+        <table class="striped">
+          <thead>
+            <tr><th>Date</th><th>Name</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            {% for appraisal in starwarscard.appraisal_set.all %}
+            <tr>
+              <td>{{appraisal.appr_date}}</td>
+              <td>{{appraisal.name}}</td>
+              <td>${{appraisal.value}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
+</div>
+<hr>
+<div class="row">
+  <div class="col s6">
+    <h5>Characters in Card</h5>
+    {% if starwarscard.characters.count %}
+      {% for character in starwarscard.characters.all %}
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">
+              {{ character.name }}
+            </span>
+          </div>
+          <div class="card-action">
+            <form action="{% url 'unassoc_character' starwarscard.id character.id %}" method="POST">
+              {% csrf_token %}
+              <button type="submit" class="btn-small">Remove</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <h7>No Characters</h7>
+    {% endif %}
+  </div>
+  <div class="col s6">
+    <h5>Available Characters</h5>
+    {% if characters.count %}
+      {% for character in characters.all %}
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">
+              {{ character.name }}
+            </span>
+          </div>
+          <div class="card-action">
+            <form action="{% url 'assoc_character' starwarscard.id character.id %}" method="POST">
+              {% csrf_token %}
+              <button type="submit" class="btn-small">Add</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <h7>No Characters Available</h7>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
